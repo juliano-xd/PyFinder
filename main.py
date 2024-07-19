@@ -2,6 +2,7 @@ import hashlib
 import base58
 import secp256k1
 import threading
+import os
 
 def sha256(data: bytes) -> bytes:
     return hashlib.sha256(data).digest()
@@ -30,7 +31,6 @@ class Right(threading.Thread):
         self.lock = threading.Lock()
 
     def generatePublic(self, number: int) -> str:
-        # Gerar uma chave privada a partir do número
         private_key_hex = format(number, '064x')
         return generate_address_from_private_key(private_key_hex)
 
@@ -51,16 +51,24 @@ class Right(threading.Thread):
             self.number += 1
             self.quantity += 1
 
+# Função para obter o número de CPUs
+def log_cpu_info():
+    num_cpus = os.cpu_count()
+    print(f"Number of CPUs: {num_cpus}")
+
 # Testando o código
-startIn = int("0000000000000000000000000000000000000000000000000000000000000001", 16)
-endIn = int("0000000000000000000000000000000000000000000000000000000000000001", 16)
-target = "19ZewH8Kk1PDbSNdJ97FP4EiCjTRaZMZQA"
+if __name__ == "__main__":
+    log_cpu_info()  # Log do número de CPUs
 
-private_key = "000000000000000000000000000000000000000000000001a838b13505b26867"
-address = generate_address_from_private_key(private_key)
-print(address)  # Deve gerar o endereço Bitcoin correspondente: 19ZewH8Kk1PDbSNdJ97FP4EiCjTRaZMZQA
+    startIn = int("0000000000000000000000000000000000000000000000000000000000000001", 16)
+    endIn = int("0000000000000000000000000000000000000000000000000000000000000001", 16)
+    target = "19ZewH8Kk1PDbSNdJ97FP4EiCjTRaZMZQA"
 
-# Exemplo de execução do worker
-worker = Right(startIn, 1, target)
-worker.start()
-worker.join()
+    private_key = "000000000000000000000000000000000000000000000001a838b13505b26867"
+    address = generate_address_from_private_key(private_key)
+    print(address)  # Deve gerar o endereço Bitcoin correspondente: 19ZewH8Kk1PDbSNdJ97FP4EiCjTRaZMZQA
+
+    # Exemplo de execução do worker
+    worker = Right(startIn, 1, target)
+    worker.start()
+    worker.join()
