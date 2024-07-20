@@ -51,10 +51,10 @@ if __name__ == "__main__":
         return start_percent, end_percent
 
     progress = 0
-    startIn = 0x80000
-    endIn = 0xfffff
+    startIn = int("0x1000000000000000000",16)
+    endIn = int("0x1ffffffffffffffffff",16)
     size = int(endIn - startIn)
-    target = "1HsMJxNiV7TLxmoF6uJNkydxPFDog4NQum"
+    target = "12VVRNPi4SJqUTsp6FmqDqY5sGosDtysn4"
     workers = []
 
     def percentage(size, percent):
