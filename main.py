@@ -58,8 +58,11 @@ class Left(Worker):
             print(f"╚═> {publickey}")
             print(f"╚═> {format(self.number, 'x')}")
 
-
 if __name__ == "__main__":
+    def get_percent_range():
+        start_percent = float(input("Defina o percentual inicial (ex: 25 para 25%): ")) / 100
+        end_percent = float(input("Defina o percentual final (ex: 72 para 72%): ")) / 100
+        return start_percent, end_percent
 
     progress = 0
     startIn = 0x80000
@@ -71,18 +74,13 @@ if __name__ == "__main__":
     def percentage(size, percent):
         return int(size * percent).__round__()
 
-    workers.append(Right(startIn, progress, target))  # 0
-
-    workers.append(Left(startIn + percentage(size, 0.25), progress, target))  # 25
-    workers.append(Right(startIn + percentage(size, 0.25), progress, target))  # 25
-
-    workers.append(Left(startIn + percentage(size, 0.5), progress, target))  # 50
-    workers.append(Right(startIn + percentage(size, 0.5), progress, target))  # 50
-
-    workers.append(Left(startIn + percentage(size, 0.75), progress, target))  # 75
-    workers.append(Right(startIn + percentage(size, 0.75), progress, target))  # 75
-
-    workers.append(Left(endIn, progress, target))  # 100
+    start_percent, end_percent = get_percent_range()
+    
+    start_index = startIn + percentage(size, start_percent)
+    end_index = startIn + percentage(size, end_percent)
+    
+    workers.append(Right(start_index, progress, target))
+    workers.append(Left(end_index, progress, target))
 
     print(f"Indexing total {len(workers)} workers...")
     for worker in workers:
