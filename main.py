@@ -2,7 +2,6 @@ import hashlib
 import base58
 import secp256k1
 import threading
-import os
 from time import sleep
 
 def sha256(data: bytes) -> bytes:
@@ -21,35 +20,22 @@ def generate_address_from_private_key(private_key_hex: str) -> str:
     return base58.b58encode(prefixed_hash160 + checksum).decode('utf-8')
 
 class Worker(threading.Thread):
-    def __init__(self, num: int, progress: int, target: str):
+    def __init__(self, num: int, progress: int, target: str, step: int):
         super().__init__()
         self.number = num + progress
         self.target = target
         self.quantity = 0
         self.lock = threading.Lock()
+        self.step = step
 
     def generatePublic(self, number: int) -> str:
         private_key_hex = format(number, '064x')
         return generate_address_from_private_key(private_key_hex)
 
-class Right(Worker):
     def run(self):
         publickey = None
         while not publickey == self.target:
-            self.number += 1
-            publickey = self.generatePublic(self.number)
-            self.quantity += 1
-
-        with self.lock:
-            print(f"\nFind in number: {self.number}")
-            print(f"╚═> {publickey}")
-            print(f"╚═> {format(self.number, 'x')}")
-
-class Left(Worker):
-    def run(self):
-        publickey = None
-        while not publickey == self.target:
-            self.number -= 1
+            self.number += self.step
             publickey = self.generatePublic(self.number)
             self.quantity += 1
 
@@ -78,9 +64,14 @@ if __name__ == "__main__":
     
     start_index = startIn + percentage(size, start_percent)
     end_index = startIn + percentage(size, end_percent)
-    
-    workers.append(Right(start_index, progress, target))
-    workers.append(Left(end_index, progress, target))
+    sub_size = (end_index - start_index) // 8  # Dividindo o intervalo em 8 subintervalos
+
+    for i in range(8):
+        sub_start = start_index + (i * sub_size)
+        if i % 2 == 0:
+            workers.append(Worker(sub_start, progress, target, 1))  # Right
+        else:
+            workers.append(Worker(sub_start, progress, target, -1))  # Left
 
     print(f"Indexing total {len(workers)} workers...")
     for worker in workers:
